@@ -1,0 +1,45 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to the main branch
+  pull_request:
+    branches:
+      - main  # Trigger on pull requests to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the code
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Set up Flutter
+    - name: Install Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.3.2'  # Set your Flutter version here
+
+    # Install dependencies
+    - name: Install dependencies
+      run: flutter pub get
+
+    # Run tests
+    - name: Run tests
+      run: flutter test
+
+    # Build the web app (optional)
+    - name: Build for Web
+      run: flutter build web
+
+    # Build the Android app (optional)
+    - name: Build for Android
+      run: flutter build apk --release
+
+    # Build the iOS app (optional, only works on macOS runners)
+    - name: Build for iOS
+      if: runner.os == 'macOS'
+      run: flutter build ios --release
