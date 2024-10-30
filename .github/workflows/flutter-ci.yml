@@ -34,12 +34,3 @@ jobs:
     # Build the web app (optional)
     - name: Build for Web
       run: flutter build web
-
-    # Build the Android app (optional)
-    - name: Build for Android
-      run: flutter build apk --release
-
-    # Build the iOS app (optional, only works on macOS runners)
-    - name: Build for iOS
-      if: runner.os == 'macOS'
-      run: flutter build ios --release
