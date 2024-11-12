@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Average At Best',
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
+        primarySwatch: Colors.grey,
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Average At Best'),
@@ -54,13 +54,13 @@ class _MyHomePageState extends State<MyHomePage>
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.grey,
       ),
       body: Column(
         children: [
           // Tabs below the AppBar
           Container(
-            color: Colors.deepPurple,
+            color: Colors.grey,
             child: TabBar(
               controller: _tabController,
               labelColor: Colors.white,
