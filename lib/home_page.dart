@@ -25,6 +25,38 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
+          // Best Selling Items Section
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Best Selling Items',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('See More'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8.0),
+          SizedBox(
+            height: 150.0,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+            ),
+          ),
+          const SizedBox(height: 24.0),
           // About Us Section
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
