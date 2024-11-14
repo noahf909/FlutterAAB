@@ -27,7 +27,7 @@ class _ProductsPageState extends State<ProductsPage> {
 
       if (response.statusCode == 200) {
         // Debugging: Print the response body
-        print('Response Body: ${response.body}');
+        //print('Response Body: ${response.body}');
 
         // Parse the JSON response
         List<dynamic> jsonResponse = json.decode(response.body);
