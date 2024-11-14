@@ -23,7 +23,7 @@ class _ProductsPageState extends State<ProductsPage> {
   Future<List<Product>> fetchProducts() async {
     try {
       final response =
-          await http.get(Uri.parse('http://www.aab.run/api/products'));
+          await http.get(Uri.parse('http://www.aab.run:5000/api/products'));
 
       if (response.statusCode == 200) {
         // Debugging: Print the response body
@@ -90,19 +90,21 @@ class ProductCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.all(8.0),
       child: ListTile(
-        leading: Image.network(
-          product.frontImageUrl,
-          width: 50,
-          height: 50,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Icon(Icons.broken_image, size: 50);
-          },
-        ),
+        leading: product.frontImageUrl.isNotEmpty
+            ? Image.network(
+                product.frontImageUrl,
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(Icons.broken_image, size: 50);
+                },
+              )
+            : Icon(Icons.image_not_supported, size: 50),
         title: Text(product.name),
         subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
         onTap: () {
-          // Implement navigation to product details if needed
+          // Navigate to product details page or show details
         },
       ),
     );

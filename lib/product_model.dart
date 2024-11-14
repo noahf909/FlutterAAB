@@ -21,18 +21,19 @@ class Product {
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
-    var sizesList = json['sizes'] as List;
-    List<SizeOption> sizes =
-        sizesList.map((i) => SizeOption.fromJson(i)).toList();
+    var sizesList = json['sizes'] as List<dynamic>? ?? [];
+    List<SizeOption> sizes = sizesList
+        .map((size) => SizeOption.fromJson(size as Map<String, dynamic>))
+        .toList();
 
     return Product(
-      id: json['_id'],
-      name: json['name'],
-      price: (json['price'] as num).toDouble(),
-      description: json['description'],
-      quantity: json['quantity'],
-      frontImageUrl: json['frontImageUrl'],
-      backImageUrl: json['backImageUrl'],
+      id: json['_id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      description: json['description']?.toString() ?? '',
+      quantity: (json['quantity'] as num?)?.toInt() ?? 0,
+      frontImageUrl: json['frontImageUrl']?.toString() ?? '',
+      backImageUrl: json['backImageUrl']?.toString() ?? '',
       sizes: sizes,
     );
   }
