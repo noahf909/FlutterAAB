@@ -26,9 +26,6 @@ class _ProductsPageState extends State<ProductsPage> {
           await http.get(Uri.parse('http://www.aab.run:5000/api/products'));
 
       if (response.statusCode == 200) {
-        // Debugging: Print the response body
-        //print('Response Body: ${response.body}');
-
         // Parse the JSON response
         List<dynamic> jsonResponse = json.decode(response.body);
 
@@ -80,19 +77,24 @@ class _ProductsPageState extends State<ProductsPage> {
   }
 }
 
-class ProductCard extends StatelessWidget {
+class ProductCard extends StatefulWidget {
   final Product product;
 
   const ProductCard({super.key, required this.product});
 
   @override
+  _ProductCardState createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<ProductCard> {
+  @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.all(8.0),
-      child: ListTile(
-        leading: product.frontImageUrl.isNotEmpty
+      child: ExpansionTile(
+        leading: widget.product.frontImageUrl.isNotEmpty
             ? Image.network(
-                product.frontImageUrl,
+                widget.product.frontImageUrl,
                 width: 50,
                 height: 50,
                 fit: BoxFit.cover,
@@ -101,11 +103,39 @@ class ProductCard extends StatelessWidget {
                 },
               )
             : Icon(Icons.image_not_supported, size: 50),
-        title: Text(product.name),
-        subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
-        onTap: () {
-          // Navigate to product details page or show details
-        },
+        title: Text(widget.product.name),
+        subtitle: Text('\$${widget.product.price.toStringAsFixed(2)}'),
+        children: [
+          // Display the sizes
+          ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: widget.product.sizes.length,
+            itemBuilder: (context, index) {
+              final sizeOption = widget.product.sizes[index];
+              final isAvailable = sizeOption.quantity > 0;
+              return ListTile(
+                title: Text(
+                  sizeOption.size,
+                  style: TextStyle(
+                    color: isAvailable ? Colors.black : Colors.grey,
+                  ),
+                ),
+                trailing: Text(
+                  'Qty: ${sizeOption.quantity}',
+                  style: TextStyle(
+                    color: isAvailable ? Colors.black : Colors.grey,
+                  ),
+                ),
+                onTap: isAvailable
+                    ? () {
+                        // Handle size selection
+                      }
+                    : null,
+              );
+            },
+          ),
+        ],
       ),
     );
   }

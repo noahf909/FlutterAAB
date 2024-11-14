@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'products_page.dart';
 import 'contacts_page.dart';
+import 'signup_page.dart'; // Import the SignUpPage
+import 'login_dialog.dart'; // Import the LoginDialog
 
 void main() {
   runApp(const MyApp());
@@ -49,12 +51,42 @@ class _MyHomePageState extends State<MyHomePage>
     super.dispose();
   }
 
+  void _openLoginDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => LoginDialog(),
+    );
+  }
+
+  void _navigateToSignUp() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SignUpPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Colors.grey,
+        actions: [
+          TextButton(
+            onPressed: _navigateToSignUp,
+            child: Text(
+              'Sign Up',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          TextButton(
+            onPressed: _openLoginDialog,
+            child: Text(
+              'Login',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
