@@ -1,5 +1,6 @@
-// main.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'customer_provider.dart';
 import 'home_page.dart';
 import 'products_page.dart';
 import 'contacts_page.dart';
@@ -8,7 +9,12 @@ import 'login_dialog.dart'; // Import the LoginDialog
 import 'profile_page.dart'; // Import the ProfilePage
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => CustomerProvider(), // Provide the CustomerProvider globally
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -39,7 +45,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String? _userName; // Variable to store the user's name
 
   @override
   void initState() {
@@ -53,67 +58,59 @@ class _MyHomePageState extends State<MyHomePage>
     super.dispose();
   }
 
+  // Function to open the login dialog
   void _openLoginDialog() async {
-    final result = await showDialog(
+    await showDialog(
       context: context,
-      builder: (context) => LoginDialog(),
+      builder: (context) => const LoginDialog(),
     );
-
-    if (result != null && result is String) {
-      setState(() {
-        _userName = result; // Update the user's name
-      });
-    }
   }
 
+  // Function to navigate to the sign-up page
   Future<void> _navigateToSignUp() async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SignUpPage()),
+      MaterialPageRoute(builder: (context) => const SignUpPage()),
     );
-
-    if (result != null && result is String) {
-      setState(() {
-        _userName = result; // Update the user's name
-      });
-    }
   }
 
-  /*void _navigateToProfile() {
+  // Function to navigate to the profile page
+  void _navigateToProfile(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ProfilePage(userName: _userName!)),
+      MaterialPageRoute(
+        builder: (context) => const ProfilePage(),
+      ),
     );
-  }*/
-
-  void _logOut() {
-    setState(() {
-      _userName = null; // Clear the user's name to log out
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Access the CustomerProvider
+    final customerProvider = Provider.of<CustomerProvider>(context);
+    final customer = customerProvider.customer;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Colors.grey,
-        actions: _userName != null
+        actions: customer != null
             ? [
                 PopupMenuButton<String>(
                   onSelected: (value) {
                     if (value == 'profile') {
-                      //_navigateToProfile();
+                      _navigateToProfile(context); // Navigate to ProfilePage
                     } else if (value == 'logout') {
-                      _logOut();
+                      customerProvider.clearCustomer(); // Log out by clearing customer data
                     }
                   },
+                  // Drop-down menu for logged-in user
                   itemBuilder: (context) => [
-                    PopupMenuItem(
+                    const PopupMenuItem(
                       value: 'profile',
                       child: Text('Profile'),
                     ),
-                    PopupMenuItem(
+                    const PopupMenuItem(
                       value: 'logout',
                       child: Text('Log Out'),
                     ),
@@ -122,8 +119,8 @@ class _MyHomePageState extends State<MyHomePage>
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Center(
                       child: Text(
-                        'Hello, $_userName',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                        'Hello, ${customer.name}',
+                        style: const TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     ),
                   ),
@@ -132,14 +129,14 @@ class _MyHomePageState extends State<MyHomePage>
             : [
                 TextButton(
                   onPressed: _navigateToSignUp,
-                  child: Text(
+                  child: const Text(
                     'Sign Up',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
                 TextButton(
                   onPressed: _openLoginDialog,
-                  child: Text(
+                  child: const Text(
                     'Login',
                     style: TextStyle(color: Colors.white),
                   ),

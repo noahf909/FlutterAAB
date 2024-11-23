@@ -149,7 +149,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       return 'Please enter your phone number';
                     }
                     // Add a basic phone number validation
-                    if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+                    if (!RegExp(r'^\d{3}-\d{3}-\d{4}$').hasMatch(value)) {
                       return 'Please enter a valid 10-digit phone number';
                     }
                     return null;

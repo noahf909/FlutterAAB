@@ -2,6 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'customer_provider.dart'; // Your CustomerProvider class
+import 'customer.dart'; // Your Customer model
 
 class LoginDialog extends StatefulWidget {
   const LoginDialog({super.key});
@@ -40,20 +43,19 @@ class _LoginDialogState extends State<LoginDialog> {
           // Parse the response
           final responseData = jsonDecode(response.body);
 
-          // Extract user information
+          // Create a Customer object from the response data
           final customerData = responseData['customer'];
-          final userName = customerData['name'];
-          final userId = customerData['_id'];
+          final customer = Customer.fromJson(customerData);
+
+          // Save the customer in CustomerProvider
+          Provider.of<CustomerProvider>(context, listen: false).setCustomer(customer);
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Login successful!')),
           );
 
-          // Close the dialog and pass the user's data
-          Navigator.of(context).pop({
-            'name': userName,
-            'userId': userId,
-          });
+          // Close the dialog
+          Navigator.of(context).pop();
         } else {
           // Handle error response
           final responseData = jsonDecode(response.body);

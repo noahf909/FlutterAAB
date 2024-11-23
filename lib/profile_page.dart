@@ -1,84 +1,74 @@
-// profile_page.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'customer_provider.dart';
+import 'customer.dart'; // Import your Customer model
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ProfilePage extends StatefulWidget {
-  final String userId;
-  final String userName;
-
-  const ProfilePage({
-    Key? key,
-    required this.userId,
-    required this.userName,
-  }) : super(key: key);
+  const ProfilePage({Key? key}) : super(key: key);
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // Controllers for the input fields
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-
-  // For form validation
   final _formKey = GlobalKey<FormState>();
-
-  bool _isLoading = true; // Indicates whether data is being loaded
+  bool _isLoading = false;
+  List<Map<String, dynamic>> _orders = []; // List to store past orders
 
   @override
   void initState() {
     super.initState();
-    _nameController.text = widget.userName;
-    _fetchUserProfile();
+    // Prepopulate the form with customer details
+    final customer = Provider.of<CustomerProvider>(context, listen: false).customer;
+    if (customer != null) {
+      _nameController.text = customer.name;
+      _phoneController.text = customer.phone;
+      _fetchOrders(customer.id); // Fetch past orders for the customer
+    }
   }
 
-  void _fetchUserProfile() async {
-    // Fetch user profile from the server
-    final url =
-        Uri.parse('http://www.aab.run:5000/api/customers/${widget.userId}');
+  Future<void> _fetchOrders(String customerId) async {
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
+      final url = Uri.parse('http://www.aab.run:5000/api/orders/customer/$customerId');
+      final response = await http.get(url);
 
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-
+        final data = jsonDecode(response.body) as List<dynamic>;
         setState(() {
-          _nameController.text = responseData['name'];
-          _phoneController.text = responseData['phone'];
+          _orders = data.cast<Map<String, dynamic>>();
           _isLoading = false;
         });
       } else {
-        // Handle error response
-        _showError('Failed to load profile');
+        _showError('Failed to fetch orders');
       }
     } catch (error) {
-      _showError('Error connecting to server: $error');
+      _showError('Error fetching orders: $error');
     }
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     setState(() {
       _isLoading = false;
     });
   }
 
-  void _updateProfile() async {
+  Future<void> _updateProfile(CustomerProvider customerProvider) async {
     if (_formKey.currentState!.validate()) {
-      // Perform update profile logic (API call)
-      final url =
-          Uri.parse('http://www.aab.run:5000/api/customers/${widget.userId}');
+      setState(() {
+        _isLoading = true;
+      });
 
+      final customer = customerProvider.customer!;
+      final url = Uri.parse('http://www.aab.run:5000/api/customers/${customer.id}');
       final updatedData = {
         'name': _nameController.text,
         'phone': _phoneController.text,
@@ -87,87 +77,41 @@ class _ProfilePageState extends State<ProfilePage> {
       try {
         final response = await http.put(
           url,
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: {'Content-Type': 'application/json'},
           body: jsonEncode(updatedData),
         );
 
         if (response.statusCode == 200) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Profile updated successfully!')),
+            const SnackBar(content: Text('Profile updated successfully!')),
           );
 
-          // Update the user's name in the AppBar if changed
-          if (_nameController.text != widget.userName) {
-            Navigator.pop(context, _nameController.text);
-          } else {
-            Navigator.pop(context);
-          }
-        } else {
-          // Handle error response
-          final responseData = jsonDecode(response.body);
-          _showError('Error: ${responseData['error'] ?? 'Unknown error'}');
-        }
-      } catch (error) {
-        _showError('Error connecting to server: $error');
-      }
-    }
-  }
-
-  void _deleteAccount() async {
-    // Confirm deletion
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Delete Account'),
-        content: Text(
-            'Are you sure you want to delete your account? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false), // Cancel
-            child: Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true), // Confirm
-            child: Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      // Perform delete account logic (API call)
-      final url =
-          Uri.parse('http://www.aab.run:5000/api/customers/${widget.userId}');
-
-      try {
-        final response = await http.delete(
-          url,
-          headers: {'Content-Type': 'application/json'},
-        );
-
-        if (response.statusCode == 200) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Account deleted successfully.')),
+          final updatedCustomer = Customer(
+            id: customer.id,
+            name: _nameController.text,
+            email: customer.email,
+            phone: _phoneController.text,
+            orders: customer.orders,
+            createdAt: customer.createdAt,
           );
+          customerProvider.setCustomer(updatedCustomer);
 
-          // Navigate back and reset the user state
-          Navigator.pop(context, 'deleted');
+          Navigator.pop(context);
         } else {
-          // Handle error response
-          final responseData = jsonDecode(response.body);
-          _showError('Error: ${responseData['error'] ?? 'Unknown error'}');
+          _showError('Failed to update profile');
         }
       } catch (error) {
-        _showError('Error connecting to server: $error');
+        _showError('Error updating profile: $error');
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
 
   @override
   void dispose() {
-    // Dispose controllers
     _nameController.dispose();
     _phoneController.dispose();
     super.dispose();
@@ -175,63 +119,90 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final customerProvider = Provider.of<CustomerProvider>(context);
+    final customer = customerProvider.customer;
+
+    if (customer == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Profile')),
+        body: const Center(child: Text('No customer data available.')),
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(title: Text('Your Profile'), backgroundColor: Colors.grey),
+      appBar: AppBar(title: const Text('Your Profile'), backgroundColor: Colors.grey),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Form(
-                key: _formKey, // Assign the form key
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Name field
-                      TextFormField(
-                        controller: _nameController,
-                        decoration: InputDecoration(labelText: 'Name'),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your name';
-                          }
-                          return null;
-                        },
-                      ),
-                      // Phone number field
-                      TextFormField(
-                        controller: _phoneController,
-                        decoration: InputDecoration(labelText: 'Phone Number'),
-                        keyboardType: TextInputType.phone,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your phone number';
-                          }
-                          // Basic phone number validation
-                          if (!RegExp(r'^\d{10}$').hasMatch(value)) {
-                            return 'Please enter a valid 10-digit phone number';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 20),
-                      // Update Profile button
-                      ElevatedButton(
-                        onPressed: _updateProfile,
-                        child: Text('Update Profile'),
-                      ),
-                      SizedBox(height: 20),
-                      // Delete Account button
-                      ElevatedButton(
-                        onPressed: _deleteAccount,
-                        child: Text('Delete Account'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Colors.red, // Set button color to red
-                        ),
-                      ),
-                    ],
-                  ),
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Name field
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(labelText: 'Name'),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your name';
+                        }
+                        return null;
+                      },
+                    ),
+                    // Phone field
+                    TextFormField(
+                      controller: _phoneController,
+                      decoration: const InputDecoration(labelText: 'Phone Number'),
+                      keyboardType: TextInputType.phone,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your phone number';
+                        }
+                        if (!RegExp(r'^\d{3}-\d{3}-\d{4}$').hasMatch(value)) {
+                          return 'Please enter a valid phone number';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    // Update Profile button
+                    ElevatedButton(
+                      onPressed: () => _updateProfile(customerProvider),
+                      child: const Text('Update Profile'),
+                    ),
+                    const SizedBox(height: 20),
+                    // Past Orders Section
+                    const Text(
+                      'Your Past Orders:',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    _orders.isEmpty
+                        ? const Text('No past orders found.')
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _orders.length,
+                            itemBuilder: (context, index) {
+                              final order = _orders[index];
+                              return ExpansionTile(
+                                title: Text('Order ID: ${order['_id']}'),
+                                subtitle: Text('Total: \$${order['total'].toStringAsFixed(2)}'),
+                                children: (order['products'] as List<dynamic>).map((product) {
+                                  final productName = product['productDetails']?['name'] ?? 'Unknown Product';
+                                  final productSize = product['size'];
+                                  final productQuantity = product['quantity'];
+                                  return ListTile(
+                                    title: Text(productName),
+                                    subtitle: Text('Size: $productSize | Quantity: $productQuantity'),
+                                  );
+                                }).toList(),
+                              );
+                            },
+                          ),
+                  ],
                 ),
               ),
             ),
