@@ -1,8 +1,11 @@
 // products_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'product_model.dart';
+import 'cart_item.dart';
+import 'cart_page.dart';
 
 class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
@@ -13,6 +16,7 @@ class ProductsPage extends StatefulWidget {
 
 class _ProductsPageState extends State<ProductsPage> {
   late Future<List<Product>> _futureProducts;
+  List<CartItem> cartItems = []; // List to store cart items
 
   @override
   void initState() {
@@ -47,46 +51,81 @@ class _ProductsPageState extends State<ProductsPage> {
     }
   }
 
+  void _addToCart(CartItem item) {
+    setState(() {
+      cartItems.add(item);
+    });
+  }
+
+  void _navigateToCart() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CartPage(cartItems: cartItems),
+      ),
+    ).then((_) {
+      setState(() {}); // Refresh in case items were removed
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Product>>(
-      future: _futureProducts,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          List<Product> products = snapshot.data!;
+    return Scaffold(
+      body: FutureBuilder<List<Product>>(
+        future: _futureProducts,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            List<Product> products = snapshot.data!;
 
-          // Check if the product list is empty
-          if (products.isEmpty) {
-            return Center(child: Text('No products available.'));
+            // Check if the product list is empty
+            if (products.isEmpty) {
+              return Center(child: Text('No products available.'));
+            }
+
+            return ListView.builder(
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                return ProductCard(
+                  product: products[index],
+                  onAddToCart: _addToCart,
+                );
+              },
+            );
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          return ListView.builder(
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              return ProductCard(product: products[index]);
-            },
-          );
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-
-        // Show a loading spinner by default
-        return const Center(child: CircularProgressIndicator());
-      },
+          // Show a loading spinner by default
+          return const Center(child: CircularProgressIndicator());
+        },
+      ),
+      floatingActionButton: cartItems.isNotEmpty
+          ? FloatingActionButton(
+              onPressed: _navigateToCart,
+              child: Icon(Icons.shopping_cart),
+            )
+          : null,
     );
   }
 }
 
 class ProductCard extends StatefulWidget {
   final Product product;
+  final Function(CartItem) onAddToCart; // Callback to add item to cart
 
-  const ProductCard({super.key, required this.product});
+  const ProductCard({
+    Key? key,
+    required this.product,
+    required this.onAddToCart,
+  }) : super(key: key);
 
   @override
   _ProductCardState createState() => _ProductCardState();
 }
 
 class _ProductCardState extends State<ProductCard> {
+  SizeOption? _selectedSize; // Keep track of the selected size
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -127,14 +166,42 @@ class _ProductCardState extends State<ProductCard> {
                     color: isAvailable ? Colors.black : Colors.grey,
                   ),
                 ),
+                selected: _selectedSize?.size == sizeOption.size,
                 onTap: isAvailable
                     ? () {
-                        // Handle size selection
+                        setState(() {
+                          _selectedSize = sizeOption;
+                        });
                       }
                     : null,
               );
             },
           ),
+          if (_selectedSize != null)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  // Add the item to the cart
+                  widget.onAddToCart(
+                    CartItem(
+                      product: widget.product,
+                      sizeOption: _selectedSize!,
+                    ),
+                  );
+
+                  // Reset the selected size
+                  setState(() {
+                    _selectedSize = null;
+                  });
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Added to cart')),
+                  );
+                },
+                child: Text('Add to Cart'),
+              ),
+            ),
         ],
       ),
     );
