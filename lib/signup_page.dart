@@ -1,5 +1,7 @@
 // signup_page.dart
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -18,15 +20,73 @@ class _SignUpPageState extends State<SignUpPage> {
   // For form validation
   final _formKey = GlobalKey<FormState>();
 
-  void _signUp() {
+  void _signUp() async {
     if (_formKey.currentState!.validate()) {
       // Perform sign-up logic (API call)
-      // For now, just print the values
-      print('Name: ${_nameController.text}');
-      print('Email: ${_emailController.text}');
-      print('Phone: ${_phoneController.text}');
-      print('Password: ${_passwordController.text}');
-      // Show a success message or navigate to another page
+      final url = Uri.parse('http://www.aab.run:5000/api/customers');
+
+      // Collect customer data
+      final customerData = {
+        'name': _nameController.text,
+        'email': _emailController.text,
+        'phone': _phoneController.text,
+        'password': _passwordController.text
+      };
+
+      try {
+        // Make POST request
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(customerData),
+        );
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          // Parse the response
+          final responseData = jsonDecode(response.body);
+
+          // Extract user information
+          final userName = responseData['name'];
+          final userId = responseData['_id'];
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Sign-up successful!')),
+          );
+
+          // Navigate back and pass the user's data
+          Navigator.pop(context, {
+            'name': userName,
+            'userId': userId,
+          });
+        } else {
+          // Handle error response
+          String errorMessage = 'An unknown error occurred';
+
+          if (response.body.isNotEmpty) {
+            try {
+              final responseData = jsonDecode(response.body);
+              if (responseData['error'] != null) {
+                errorMessage = responseData['error'];
+              } else {
+                errorMessage = 'Unexpected response: ${response.body}';
+              }
+            } catch (e) {
+              errorMessage = 'Error parsing response: $e';
+            }
+          } else {
+            errorMessage = 'Empty response from server';
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $errorMessage')),
+          );
+        }
+      } catch (error) {
+        // Handle network or parsing errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error connecting to server: $error')),
+        );
+      }
     }
   }
 
@@ -43,8 +103,7 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(title: Text('Sign Up')), // AppBar with 'Sign Up' as the title
+      appBar: AppBar(title: Text('Sign Up'), backgroundColor: Colors.grey),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

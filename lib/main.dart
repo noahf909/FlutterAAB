@@ -5,6 +5,7 @@ import 'products_page.dart';
 import 'contacts_page.dart';
 import 'signup_page.dart'; // Import the SignUpPage
 import 'login_dialog.dart'; // Import the LoginDialog
+import 'profile_page.dart'; // Import the ProfilePage
 
 void main() {
   runApp(const MyApp());
@@ -38,6 +39,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  String? _userName; // Variable to store the user's name
 
   @override
   void initState() {
@@ -51,18 +53,43 @@ class _MyHomePageState extends State<MyHomePage>
     super.dispose();
   }
 
-  void _openLoginDialog() {
-    showDialog(
+  void _openLoginDialog() async {
+    final result = await showDialog(
       context: context,
       builder: (context) => LoginDialog(),
     );
+
+    if (result != null && result is String) {
+      setState(() {
+        _userName = result; // Update the user's name
+      });
+    }
   }
 
-  void _navigateToSignUp() {
-    Navigator.push(
+  Future<void> _navigateToSignUp() async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => SignUpPage()),
     );
+
+    if (result != null && result is String) {
+      setState(() {
+        _userName = result; // Update the user's name
+      });
+    }
+  }
+
+  /*void _navigateToProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ProfilePage(userName: _userName!)),
+    );
+  }*/
+
+  void _logOut() {
+    setState(() {
+      _userName = null; // Clear the user's name to log out
+    });
   }
 
   @override
@@ -71,22 +98,53 @@ class _MyHomePageState extends State<MyHomePage>
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Colors.grey,
-        actions: [
-          TextButton(
-            onPressed: _navigateToSignUp,
-            child: Text(
-              'Sign Up',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          TextButton(
-            onPressed: _openLoginDialog,
-            child: Text(
-              'Login',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
+        actions: _userName != null
+            ? [
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'profile') {
+                      //_navigateToProfile();
+                    } else if (value == 'logout') {
+                      _logOut();
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'profile',
+                      child: Text('Profile'),
+                    ),
+                    PopupMenuItem(
+                      value: 'logout',
+                      child: Text('Log Out'),
+                    ),
+                  ],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Center(
+                      child: Text(
+                        'Hello, $_userName',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ),
+              ]
+            : [
+                TextButton(
+                  onPressed: _navigateToSignUp,
+                  child: Text(
+                    'Sign Up',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                TextButton(
+                  onPressed: _openLoginDialog,
+                  child: Text(
+                    'Login',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
       ),
       body: Column(
         children: [

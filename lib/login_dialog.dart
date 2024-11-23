@@ -1,5 +1,7 @@
 // login_dialog.dart
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginDialog extends StatefulWidget {
   const LoginDialog({super.key});
@@ -16,15 +18,55 @@ class _LoginDialogState extends State<LoginDialog> {
   // For form validation
   final _formKey = GlobalKey<FormState>();
 
-  void _login() {
+  void _login() async {
     if (_formKey.currentState!.validate()) {
       // Perform login logic (API call)
-      // For now, just print the values
-      print('Email: ${_emailController.text}');
-      print('Password: ${_passwordController.text}');
-      // Close the dialog
-      Navigator.of(context).pop();
-      // Show a success message or navigate to another page
+      final url = Uri.parse('http://www.aab.run:5000/api/customers/login');
+
+      final loginData = {
+        'email': _emailController.text,
+        'password': _passwordController.text,
+      };
+
+      try {
+        // Make POST request
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(loginData),
+        );
+
+        if (response.statusCode == 200) {
+          // Parse the response
+          final responseData = jsonDecode(response.body);
+
+          // Extract user information
+          final customerData = responseData['customer'];
+          final userName = customerData['name'];
+          final userId = customerData['_id'];
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login successful!')),
+          );
+
+          // Close the dialog and pass the user's data
+          Navigator.of(context).pop({
+            'name': userName,
+            'userId': userId,
+          });
+        } else {
+          // Handle error response
+          final responseData = jsonDecode(response.body);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${responseData['error']}')),
+          );
+        }
+      } catch (error) {
+        // Handle network or parsing errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error connecting to server: $error')),
+        );
+      }
     }
   }
 
