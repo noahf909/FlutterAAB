@@ -46,6 +46,8 @@ class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  Color _titleColor = Colors.grey[800]!; // Dark grey color
+
   @override
   void initState() {
     super.initState();
@@ -56,6 +58,13 @@ class _MyHomePageState extends State<MyHomePage>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  // Function to switch to the Products tab
+  void _switchToProductsTab() {
+    setState(() {
+      _tabController.index = 1; // Index of the Products tab (0-based index)
+    });
   }
 
   // Function to open the login dialog
@@ -92,8 +101,26 @@ class _MyHomePageState extends State<MyHomePage>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Colors.grey,
+        title: GestureDetector(
+          onTap: () {
+            setState(() {
+              _titleColor = Colors.black;
+            });
+          },
+          child: Text(
+            widget.title,
+            style: TextStyle(color: _titleColor),
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0, // Remove default shadow
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(
+            color: Colors.black,
+            height: 1.0,
+          ),
+        ),
         actions: customer != null
             ? [
                 PopupMenuButton<String>(
@@ -120,7 +147,7 @@ class _MyHomePageState extends State<MyHomePage>
                     child: Center(
                       child: Text(
                         'Hello, ${customer.name}',
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                        style: const TextStyle(color: Colors.grey, fontSize: 16),
                       ),
                     ),
                   ),
@@ -131,14 +158,14 @@ class _MyHomePageState extends State<MyHomePage>
                   onPressed: _navigateToSignUp,
                   child: const Text(
                     'Sign Up',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.grey),
                   ),
                 ),
                 TextButton(
                   onPressed: _openLoginDialog,
                   child: const Text(
                     'Login',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.grey),
                   ),
                 ),
               ],
@@ -147,16 +174,21 @@ class _MyHomePageState extends State<MyHomePage>
         children: [
           // Tabs below the AppBar
           Container(
-            color: Colors.grey,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                bottom: BorderSide(color: Colors.black),
+              ),
+            ),
             child: TabBar(
               controller: _tabController,
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white70,
-              indicatorColor: Colors.white,
+              labelColor: Colors.black,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: Colors.black,
               tabs: const [
                 Tab(text: 'Home'),
                 Tab(text: 'Products'),
-                Tab(text: 'Contacts'),
+                Tab(text: 'About'),
               ],
             ),
           ),
@@ -164,10 +196,12 @@ class _MyHomePageState extends State<MyHomePage>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: const [
-                HomePage(),
-                ProductsPage(),
-                ContactsPage(),
+              children: [
+                HomePage(
+                  onExploreNow: _switchToProductsTab, // Pass the callback
+                ),
+                const ProductsPage(),
+                const ContactsPage(),
               ],
             ),
           ),
