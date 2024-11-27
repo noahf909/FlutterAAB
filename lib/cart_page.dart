@@ -39,9 +39,9 @@ class _CartPageState extends State<CartPage> {
         widget.cartItems.clear();
       });
 
-      // Navigate back to the main page or show a confirmation message
+      // Show a confirmation message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Thank you for your purchase!')),
+        const SnackBar(content: Text('Thank you for your purchase!')),
       );
       Navigator.pop(context);
     }
@@ -51,17 +51,20 @@ class _CartPageState extends State<CartPage> {
     setState(() {
       widget.cartItems.removeAt(index);
     });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Item removed from cart')),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Your Cart'),
+        title: const Text('Your Cart'),
         backgroundColor: Colors.grey,
       ),
       body: widget.cartItems.isEmpty
-          ? Center(child: Text('Your cart is empty.'))
+          ? const Center(child: Text('Your cart is empty.'))
           : Column(
               children: [
                 Expanded(
@@ -77,39 +80,43 @@ class _CartPageState extends State<CartPage> {
                                 height: 50,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
-                                  return Icon(Icons.broken_image, size: 50);
+                                  return const Icon(Icons.broken_image, size: 50);
                                 },
                               )
-                            : Icon(Icons.image_not_supported, size: 50),
+                            : const Icon(Icons.image_not_supported, size: 50),
                         title: Text(cartItem.product.name),
                         subtitle: Text('Size: ${cartItem.sizeOption.size}'),
-                        trailing: Text(
-                          '\$${cartItem.product.price.toStringAsFixed(2)}',
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '\$${cartItem.product.price.toStringAsFixed(2)}',
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () {
+                                _removeItem(index);
+                              },
+                            ),
+                          ],
                         ),
-                        onLongPress: () {
-                          // Remove item from cart
-                          _removeItem(index);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Item removed from cart')),
-                          );
-                        },
                       );
                     },
                   ),
                 ),
-                Divider(),
+                const Divider(),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
                     'Subtotal: \$${subtotal.toStringAsFixed(2)}',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
                 ElevatedButton(
                   onPressed: _continueToCheckout,
-                  child: Text('Continue to Checkout'),
+                  child: const Text('Continue to Checkout'),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
               ],
             ),
     );

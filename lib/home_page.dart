@@ -11,18 +11,18 @@ class HomePage extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Banner with Text and Search Bar
+          // Banner with Text and Explore Products Button
           Container(
             margin: const EdgeInsets.all(16.0),
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
-              color: Color(0xFFaacfcf), // Color: #aacfcf
+              color: const Color(0xFFaacfcf), // Color: #aacfcf
               borderRadius: BorderRadius.circular(12.0),
             ),
             child: Column(
               children: [
                 // Title Text
-                Text(
+                const Text(
                   'Made for the Average Runner',
                   style: TextStyle(
                     fontSize: 24.0, // Big text size
@@ -42,14 +42,25 @@ class HomePage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 16.0),
-                // Search Bar
-                const TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search for products...',
-                    prefixIcon: Icon(Icons.search),
-                    border: InputBorder.none,
-                    filled: true,
-                    fillColor: Colors.white, // White background for input
+                // Explore Products Button
+                ElevatedButton(
+                  onPressed: onExploreNow, // Use the callback
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white, // White background for the button
+                    foregroundColor: Colors.black, // Black text color
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0,
+                      vertical: 12.0,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  child: const Text(
+                    'Explore Products',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                    ),
                   ),
                 ),
               ],
@@ -58,7 +69,7 @@ class HomePage extends StatelessWidget {
           // About Us Section
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
+            child: const Text(
               'About Us',
               style: TextStyle(
                 fontSize: 22.0,
@@ -72,11 +83,11 @@ class HomePage extends StatelessWidget {
           // About Us Paragraph
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
+            child: const Text(
               'At Average at Best, we started with a simple idea: running is for everyone. Whether you\'re starting your journey or simply looking for comfortable, affordable gear to keep up with your daily run, we’re here for you. We\'re here to celebrate the everyday runner, the ones who believe that running is more about the journey than the destination. So, whether you\'re setting new personal records or just getting started, we\'re with you every step of the way.',
               style: TextStyle(
                 fontSize: 16.0,
-                color: Colors.grey[700],
+                color: Colors.grey,
               ),
               textAlign: TextAlign.center, // Centered paragraph
             ),
@@ -86,7 +97,7 @@ class HomePage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
-              children: [
+              children: const [
                 _IconWithText(
                   icon: Icons.directions_run,
                   title: 'Performance',
@@ -114,7 +125,7 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               children: [
-                Text(
+                const Text(
                   'Shop by Category',
                   style: TextStyle(
                     fontSize: 22.0,
@@ -137,12 +148,12 @@ class HomePage extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
-                    color: Color(0xFFaacfcf),
+                    color: const Color(0xFFaacfcf),
                     borderRadius: BorderRadius.circular(12.0),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
+                    children: const [
                       _CategoryItem(
                         imagePath: 'assets/mens_item.jpg', // Replace with your image path
                         label: 'Men',
@@ -167,7 +178,7 @@ class HomePage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               children: [
-                Text(
+                const Text(
                   'Explore All AAB Products',
                   style: TextStyle(
                     fontSize: 22.0,
@@ -177,11 +188,11 @@ class HomePage extends StatelessWidget {
                   textAlign: TextAlign.center, // Centered heading
                 ),
                 const SizedBox(height: 8.0),
-                Text(
+                const Text(
                   'Browse our full range of running apparel and accessories to find the perfect gear for your journey.',
                   style: TextStyle(
                     fontSize: 16.0,
-                    color: Colors.grey[700],
+                    color: Colors.grey,
                   ),
                   textAlign: TextAlign.center, // Centered paragraph
                 ),
@@ -190,12 +201,19 @@ class HomePage extends StatelessWidget {
                 ElevatedButton(
                   onPressed: onExploreNow, // Use the callback
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFaacfcf), // Button color same as search bar box
+                    backgroundColor: const Color(0xFFaacfcf), // Button color same as banner
+                    foregroundColor: Colors.white, // White text color
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0,
+                      vertical: 12.0,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
                   child: const Text(
                     'Explore Now',
                     style: TextStyle(
-                      color: Colors.white, // White text
                       fontSize: 16.0,
                     ),
                   ),
@@ -230,8 +248,8 @@ class _IconWithText extends StatelessWidget {
         Container(
           width: 80,
           height: 80,
-          decoration: BoxDecoration(
-            color: Color(0xFFaacfcf), // Circle color same as search bar box
+          decoration: const BoxDecoration(
+            color: Color(0xFFaacfcf), // Circle color same as banner
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -242,7 +260,7 @@ class _IconWithText extends StatelessWidget {
         // Title text
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 18.0,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -298,7 +316,7 @@ class _CategoryItem extends StatelessWidget {
         // Label
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16.0,
             color: Colors.black,
           ),
