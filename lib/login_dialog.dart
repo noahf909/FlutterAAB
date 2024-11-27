@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'customer_provider.dart'; // Your CustomerProvider class
+import 'forgot_password.dart'; //import forgot password 
 import 'customer.dart'; // Your Customer model
 
 class LoginDialog extends StatefulWidget {
@@ -72,6 +73,14 @@ class _LoginDialogState extends State<LoginDialog> {
     }
   }
 
+  void _forgotPassword() {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) => ForgotPasswordPage(),
+    ),
+  );
+}
+
   @override
   void dispose() {
     // Dispose controllers when the widget is removed from the widget tree
@@ -128,6 +137,13 @@ class _LoginDialogState extends State<LoginDialog> {
           },
           child: Text('Cancel'),
         ),
+
+        // Forgot Password button
+        TextButton(
+          onPressed: _forgotPassword,
+          child: Text('Forgot Password?'),
+        ),
+
         // Login button
         ElevatedButton(
           onPressed: _login,
