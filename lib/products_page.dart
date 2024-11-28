@@ -193,7 +193,8 @@ class ProductCard extends StatefulWidget {
 }
 
 class _ProductCardState extends State<ProductCard> {
-  SizeOption? _selectedSize; // Keep track of the selected size
+  SizeOption? _selectedSize; // Tracks the selected size
+  int _selectedQuantity = 1; // Tracks the quantity for the selected size
 
   @override
   Widget build(BuildContext context) {
@@ -206,15 +207,12 @@ class _ProductCardState extends State<ProductCard> {
                 width: 50,
                 height: 50,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.broken_image, size: 50);
-                },
               )
             : const Icon(Icons.image_not_supported, size: 50),
         title: Text(widget.product.name),
         subtitle: Text('\$${widget.product.price.toStringAsFixed(2)}'),
         children: [
-          // Display the sizes
+          // List of sizes
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -222,53 +220,100 @@ class _ProductCardState extends State<ProductCard> {
             itemBuilder: (context, index) {
               final sizeOption = widget.product.sizes[index];
               final isAvailable = sizeOption.quantity > 0;
-              return ListTile(
-                title: Text(
-                  sizeOption.size,
-                  style: TextStyle(
-                    color: isAvailable ? Colors.black : Colors.grey,
+
+              return Container(
+                color: _selectedSize?.size == sizeOption.size
+                    ? Colors.blue.withOpacity(0.2)
+                    : null, // Highlight selected size
+                child: ListTile(
+                  title: Text(
+                    sizeOption.size,
+                    style: TextStyle(
+                      color: isAvailable ? Colors.black : Colors.grey,
+                    ),
                   ),
-                ),
-                trailing: Text(
-                  'Qty: ${sizeOption.quantity}',
-                  style: TextStyle(
-                    color: isAvailable ? Colors.black : Colors.grey,
+                  trailing: Text(
+                    'Available: ${sizeOption.quantity}',
+                    style: TextStyle(
+                      color: isAvailable ? Colors.black : Colors.grey,
+                    ),
                   ),
+                  selected: _selectedSize?.size == sizeOption.size,
+                  onTap: isAvailable
+                      ? () {
+                          setState(() {
+                            _selectedSize = sizeOption;
+                            _selectedQuantity = 1; // Reset quantity
+                          });
+                        }
+                      : null,
                 ),
-                selected: _selectedSize?.size == sizeOption.size,
-                onTap: isAvailable
-                    ? () {
-                        setState(() {
-                          _selectedSize = sizeOption;
-                        });
-                      }
-                    : null,
               );
             },
           ),
           if (_selectedSize != null)
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  // Add the item to the cart
-                  widget.onAddToCart(
-                    CartItem(
-                      product: widget.product,
-                      sizeOption: _selectedSize!,
-                    ),
-                  );
+              child: Column(
+                children: [
+                  // Quantity Selector
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Select Quantity:'),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove),
+                            onPressed: _selectedQuantity > 1
+                                ? () {
+                                    setState(() {
+                                      _selectedQuantity--;
+                                    });
+                                  }
+                                : null,
+                          ),
+                          Text(_selectedQuantity.toString()),
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: _selectedQuantity <
+                                    _selectedSize!.quantity
+                                ? () {
+                                    setState(() {
+                                      _selectedQuantity++;
+                                    });
+                                  }
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  // Add to Cart Button
+                  ElevatedButton(
+                    onPressed: () {
+                      widget.onAddToCart(
+                        CartItem(
+                          product: widget.product,
+                          sizeOption: _selectedSize!,
+                          quantity: _selectedQuantity,
+                        ),
+                      );
 
-                  // Reset the selected size
-                  setState(() {
-                    _selectedSize = null;
-                  });
+                      // Reset selection
+                      setState(() {
+                        _selectedSize = null;
+                        _selectedQuantity = 1;
+                      });
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Added to cart')),
-                  );
-                },
-                child: const Text('Add to Cart'),
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Added to cart')),
+                      );
+                    },
+                    child: const Text('Add to Cart'),
+                  ),
+                ],
               ),
             ),
         ],
@@ -276,3 +321,6 @@ class _ProductCardState extends State<ProductCard> {
     );
   }
 }
+
+
+

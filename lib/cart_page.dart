@@ -1,8 +1,6 @@
-// cart_page.dart
-
 import 'package:flutter/material.dart';
 import 'cart_item.dart';
-import 'checkout_page.dart'; // Import the CheckoutPage
+import 'checkout_page.dart';
 
 class CartPage extends StatefulWidget {
   final List<CartItem> cartItems;
@@ -17,7 +15,7 @@ class _CartPageState extends State<CartPage> {
   double get subtotal {
     return widget.cartItems.fold(
       0.0,
-      (total, item) => total + item.product.price,
+      (total, item) => total + (item.product.price * item.quantity),
     );
   }
 
@@ -56,6 +54,17 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
+  void _updateQuantity(int index, int delta) {
+    setState(() {
+      final cartItem = widget.cartItems[index];
+      // Update quantity within available stock
+      if (cartItem.quantity + delta > 0 &&
+          cartItem.quantity + delta <= cartItem.sizeOption.quantity) {
+        cartItem.quantity += delta;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,12 +94,38 @@ class _CartPageState extends State<CartPage> {
                               )
                             : const Icon(Icons.image_not_supported, size: 50),
                         title: Text(cartItem.product.name),
-                        subtitle: Text('Size: ${cartItem.sizeOption.size}'),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Size: ${cartItem.sizeOption.size}'),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove),
+                                  onPressed: cartItem.quantity > 1
+                                      ? () => _updateQuantity(index, -1)
+                                      : null,
+                                ),
+                                Text(
+                                  '${cartItem.quantity}',
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.add),
+                                  onPressed: cartItem.quantity <
+                                          cartItem.sizeOption.quantity
+                                      ? () => _updateQuantity(index, 1)
+                                      : null,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              '\$${cartItem.product.price.toStringAsFixed(2)}',
+                              '\$${(cartItem.product.price * cartItem.quantity).toStringAsFixed(2)}',
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete),

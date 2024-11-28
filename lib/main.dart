@@ -7,8 +7,15 @@ import 'contacts_page.dart';
 import 'signup_page.dart'; // Import the SignUpPage
 import 'login_dialog.dart'; // Import the LoginDialog
 import 'profile_page.dart'; // Import the ProfilePage
+import 'package:flutter_stripe/flutter_stripe.dart'; //add stripe key
+import 'package:flutter_dotenv/flutter_dotenv.dart'; //add stripe key
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); //ensure .env is complete before running app
+
+  await dotenv.load(fileName: "web/.env");
+
+  Stripe.publishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY']!;
   runApp(
     ChangeNotifierProvider(
       create: (_) => CustomerProvider(), // Provide the CustomerProvider globally
