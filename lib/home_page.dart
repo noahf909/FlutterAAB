@@ -155,15 +155,15 @@ class HomePage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: const [
                       _CategoryItem(
-                        imagePath: 'assets/mens_item.jpg', // Replace with your image path
+                        imagePath: 'assets/mens.jpg', // Replace with your image path
                         label: 'Men',
                       ),
                       _CategoryItem(
-                        imagePath: 'assets/womens_item.jpg', // Replace with your image path
+                        imagePath: 'assets/womens.jpg', // Replace with your image path
                         label: 'Women',
                       ),
                       _CategoryItem(
-                        imagePath: 'assets/accessories_item.jpg', // Replace with your image path
+                        imagePath: 'assets/accessories.jpg', // Replace with your image path
                         label: 'Accessories',
                       ),
                     ],

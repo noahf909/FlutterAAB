@@ -34,6 +34,7 @@ dependencies:
   provider: 6.1.2 
   flutter_stripe: ^11.3.0
   flutter_dotenv: ^5.2.1
+  url_launcher: ^6.1.11
 
 
 
@@ -66,6 +67,18 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
       - web/.env
+      - assets/katelyn.jpg
+      - assets/santoscutie.jpg
+      - assets/noah.jpg
+      - assets/randy.jpg
+      - assets/ashtoncutiepatootie.jpg
+      - assets/nick.jpg
+      - assets/jacob.jpg
+      - assets/joshua.jpg
+      - assets/icons/LI-In-Bug.png
+      - assets/womens.jpg
+      - assets/mens.jpg
+      - assets/accessories.jpg
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
