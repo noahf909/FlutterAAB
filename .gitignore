@@ -43,3 +43,13 @@ app.*.map.json
 /android/app/release
 
 .env
+
+#generated files from running
+.vscode/settings.json
+linux/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugins.cmake
+windows/flutter/generated_plugin_registrant.h
+windows/flutter/generated_plugin_registrant.cc
+macos/Flutter/GeneratedPluginRegistrant.swift
+linux/flutter/generated_plugins.cmake
+linux/flutter/generated_plugin_registrant.h
