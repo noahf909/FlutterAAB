@@ -3,6 +3,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'cart_item.dart';
+//import customer provider
+import 'package:provider/provider.dart';
+import 'customer_provider.dart';
+
 
 class CheckoutPage extends StatefulWidget {
   final List<CartItem> cartItems;
@@ -112,8 +116,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Future<void> _saveOrder() async {
+    final customerProvider = Provider.of<CustomerProvider>(context, listen: false);
+    final userId = customerProvider.customer?.id; // Get logged-in customer ID
+    
     final orderData = {
-      'userId': null,
+      'userId': userId,
       'products': widget.cartItems.map((item) => item.toJson()).toList(),
       'total': widget.subtotal,
       'address':
@@ -131,83 +138,95 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
   }
 
+  //automatically update fields when logged in
+  Widget _buildContactInfo() {
+  final customerProvider = Provider.of<CustomerProvider>(context);
+  final email = customerProvider.customer?.email ?? '';
+
+  return TextFormField(
+    controller: _contactEmailController..text = email, // Auto-fill email
+    decoration: const InputDecoration(labelText: 'Email'),
+    keyboardType: TextInputType.emailAddress,
+    validator: (value) {
+      if (value == null || value.isEmpty) {
+        return 'Please enter your email';
+      }
+      return null;
+    },
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
+    //check customer is logged in
+    final customerProvider = Provider.of<CustomerProvider>(context);
+    final isLoggedIn = customerProvider.customer != null;
+
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Checkout')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Contact Information
-                const Text('Contact Information'),
-                TextFormField(
-                  controller: _contactEmailController,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                // Delivery Address
-                const Text('Delivery Address'),
-                ..._buildAddressFields(_deliveryAddress),
-
-                const SizedBox(height: 20),
-
-                // Billing Address
-                CheckboxListTile(
-                  title: const Text('Billing Address Same as Delivery Address'),
-                  value: _useSameAddress,
-                  onChanged: (value) {
-                    setState(() {
-                      _useSameAddress = value!;
-                      if (_useSameAddress) {
-                        _billingAddress.addAll(_deliveryAddress);
-                      }
-                    });
-                  },
-                ),
-                if (!_useSameAddress)
-                  const Text('Billing Address'),
-                if (!_useSameAddress) ..._buildAddressFields(_billingAddress),
-
-                const SizedBox(height: 20),
-
-                
-
-                const Text('Total:'),
+    appBar: AppBar(title: const Text('Checkout')),
+    body: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (isLoggedIn)
                 Text(
-                  '\$${widget.subtotal.toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  'Logged in as: ${customerProvider.customer!.email}',
+                  style: TextStyle(color: Colors.green),
+                )
+              else
+                Text(
+                  'You are not logged in. Please log in to save your order to your account.',
+                  style: TextStyle(color: Colors.red),
                 ),
-                const SizedBox(height: 20),
-
-                // Payment Button
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _processPayment,
-                  child: _isLoading
-                      ? const CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        )
-                      : const Text('Pay Now'),
-                ),
-              ],
-            ),
+              const SizedBox(height: 20),
+              const Text('Contact Information'),
+              _buildContactInfo(),
+              const SizedBox(height: 20),
+              const Text('Delivery Address'),
+              ..._buildAddressFields(_deliveryAddress),
+              const SizedBox(height: 20),
+              CheckboxListTile(
+                title: const Text('Billing Address Same as Delivery Address'),
+                value: _useSameAddress,
+                onChanged: (value) {
+                  setState(() {
+                    _useSameAddress = value!;
+                    if (_useSameAddress) {
+                      _billingAddress.addAll(_deliveryAddress);
+                    }
+                  });
+                },
+              ),
+              if (!_useSameAddress)
+                ..._buildAddressFields(_billingAddress),
+              const SizedBox(height: 20),
+              const Text('Total:'),
+              Text(
+                '\$${widget.subtotal.toStringAsFixed(2)}',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _processPayment,
+                child: _isLoading
+                    ? const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      )
+                    : const Text('Pay Now'),
+              ),
+            ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   List<Widget> _buildAddressFields(Map<String, String> address) {
     return [
