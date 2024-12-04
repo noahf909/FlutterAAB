@@ -30,9 +30,19 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.debug
+            // Enable code shrinking, obfuscation, and resource optimization
+            minifyEnabled true
+            shrinkResources true
+
+            // Specify ProGuard rules file
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            // Use the debug signing configuration for simplicity
+            signingConfig signingConfigs.debug
         }
     }
+
+
 
     dependencies {
         implementation "androidx.multidex:multidex:2.0.1" // Enables multidex
