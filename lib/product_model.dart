@@ -5,8 +5,8 @@ class Product {
   final double price;
   final String description;
   final int quantity;
-  final String frontImageUrl;
-  final String backImageUrl;
+  String frontImageUrl;
+  String backImageUrl;
   final List<SizeOption> sizes;
 
   Product({

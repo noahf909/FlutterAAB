@@ -57,6 +57,34 @@ class _ProductsPageState extends State<ProductsPage> {
             .map((data) => Product.fromJson(data as Map<String, dynamic>))
             .toList();
 
+        for (var product in products) {
+          if (product.id == 'mens-oversized-t-shirt-black') {
+            product.frontImageUrl = 'assets/products/tshirt.jpg';
+            product.backImageUrl = 'assets/products/tshirt.jpg';
+          } else if (product.id == 'mens-crest-oversized-hoodie') {
+            product.frontImageUrl = 'assets/products/hoodie.jpg';
+            product.backImageUrl = 'assets/products/hoodie.jpg';
+          } else if (product.id == 'mens-running-shorts') {
+            product.frontImageUrl = 'assets/products/shorts.jpg';
+            product.backImageUrl = 'assets/products/shorts.jpg';
+          } else if (product.id == 'womens-rest-day-sweats-hoodie') {
+            product.frontImageUrl = 'assets/products/resthoodie.jpg';
+            product.backImageUrl = 'assets/products/resthoodie.jpg';
+          } else if (product.id == 'womens-every-day-long-sleeve-crop-top') {
+            product.frontImageUrl = 'assets/products/crop.jpg';
+            product.backImageUrl = 'assets/products/crop.jpg';
+          } else if (product.id == 'womens-every-day-long-sleeve-crop-top') {
+            product.frontImageUrl = 'assets/products/crop.jpg';
+            product.backImageUrl = 'assets/products/crop.jpg';
+          } else if (product.id == 'womens-training-oversized-t-shirt') {
+            product.frontImageUrl = 'assets/products/trainingt.jpg';
+            product.backImageUrl = 'assets/products/trainingt.jpg';
+          } else {
+            product.frontImageUrl = 'assets/products/leinecker_coin.gif';
+            product.backImageUrl = 'assets/products/leinecker_coin.gif';
+          }
+        }
+
         setState(() {
           _allProducts = products;
           _filteredProducts = products;
@@ -202,7 +230,7 @@ class _ProductCardState extends State<ProductCard> {
       margin: const EdgeInsets.all(8.0),
       child: ExpansionTile(
         leading: widget.product.frontImageUrl.isNotEmpty
-            ? Image.network(
+            ? Image.asset(
                 widget.product.frontImageUrl,
                 width: 50,
                 height: 50,
